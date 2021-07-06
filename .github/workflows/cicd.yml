@@ -42,7 +42,7 @@ jobs:
       - name: Terraform Validate
         continue-on-error: true
         run: |
-          cat /dev/nulll > tf_plan
+          cat /dev/null > tf_plan
           terraform fmt -recursive -check -diff
           terraform validate
 
