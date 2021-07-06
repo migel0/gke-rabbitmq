@@ -125,8 +125,9 @@ jobs:
           ls -al environment
           export CLUSTERNAME=$(grep "^name" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
           export CLUSTERZONE=$(grep "^main_zone" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
-          echo '::set-output name=clustername::${CLUSTERNAME}'
-          echo '::set-output name=clusterzone::${CLUSTERZONE}'
+          echo '::set-output name=clustername::$CLUSTERNAME'
+          echo '::set-output name=clusterzone::$CLUSTERZONE'
+          echo ${{ steps.varsCluster.outputs.clustername }}
           sed -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./modules/rabbitmq/02-rabbitmqcluster.tmpl >  ./modules/rabbitmq/02-rabbitmqcluster.yaml
 
       #export CLUSTERZONE=$(grep "^main_zone" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
