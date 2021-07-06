@@ -1,6 +1,6 @@
 project_id            = "kalopsianet"
 credentials_file_path = "./gcloudkey.json"
-service_account       = "bastiongke@kalopsianet.iam.gserviceaccount.com"
+service_account       = "terraform@kalopsianet.iam.gserviceaccount.com"
 region                = "europe-west3"
 name                  = "kalopsiagke"
 main_zone             = "europe-west3-b"

@@ -8,7 +8,7 @@ name: Gke-Rabbit-deployment
 on: 
   push:
     branches:
-      - 'dev/**'
+      - 'infradev/**'
     pull_request:
     workflow_dispatch:
     inputs:
