@@ -124,7 +124,7 @@ jobs:
           ls -al *
           sed  -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  02-rabbitmqcluster.tmpl >  02-rabbitmqcluster.yaml
           ls -al *
-          working-directory: modules/rabbitmq
+        working-directory: ./modules/rabbitmq
 
       - id: get-credentials
         if:  github.event_name == 'push' 
