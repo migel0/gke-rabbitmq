@@ -10,6 +10,13 @@ on:
     branches:
       - 'dev/**'
     pull_request:
+    workflow_dispatch:
+    inputs:
+      actiondestroy:
+        description: 'Excute Terraform destroy'
+        required: false
+        default: 'no'
+
  #  paths:
  #  - 'gke_tf/**'
  #  - 'worker_nodes/**' 
@@ -43,7 +50,7 @@ jobs:
         continue-on-error: true
         run: |
           cat /dev/null > tf_plan
-           terraform fmt -recursive -check -diff
+          terraform fmt -recursive  -diff
           terraform fmt -recursive -check=true
           terraform init
           terraform validate
@@ -184,4 +191,29 @@ jobs:
 #        SLACK_MESSAGE: ${{ github.event.head_commit.message }}
 #        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 #        SLACK_FOOTER: 'Terraform Github Actions Dev Branch Push Alert'
-#
+
+  terraform_destroy:
+    name: 'Terraform Destroy'
+    runs-on: ubuntu-latest
+    if: github.event.inputs.actiondestroy == "yes"
+    environment:
+      name: DEV
+
+    steps: 
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - name: Setup GCP Service Account
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        version: 'latest'
+        service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
+        export_default_credentials: true
+
+        # destroy resources via Terraform        
+    - name: Terraform Destroy
+      run: |
+        terraform init -no-color 
+        terraform show "tf_plan"
+        terraform destroy  "tf_plan" --var-file=./environment/${PREFIX}.tfvars   -auto-approve -input=false
