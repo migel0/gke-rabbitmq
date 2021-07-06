@@ -119,7 +119,7 @@ jobs:
 
   rabbitmq:
     name: rabbitmq
-    runs-on: ubuntu-latest
+    runs-on: localrunner
     environment:
       name: DEV
     needs: terraform_apply
