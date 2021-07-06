@@ -61,7 +61,7 @@ jobs:
           cat /dev/null > tf_plan
           terraform init
           terraform get     
-          terraform plan --var-file=./environment/${PREFIX}.tfvars -out "tf_plan" -input=false
+          terraform plan --var-file=./environment/${{ secrets.PREFIX }}.tfvars -out "tf_plan" -input=false
 
       - name: Upload TF Plan
         uses: actions/upload-artifact@v2
