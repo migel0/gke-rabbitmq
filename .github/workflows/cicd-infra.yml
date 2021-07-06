@@ -104,7 +104,7 @@ jobs:
       run: |
         terraform init -no-color 
         terraform show "tf_plan"
-        terraform apply -var-file=./environment/${PREFIX}.tfvars  -auto-approve -input=false
+        terraform apply -var-file=./environment/${{ secrets.PREFIX }}.tfvars -auto-approve -input=false
   
 
   rabbitmq:
@@ -215,4 +215,4 @@ jobs:
       run: |
         terraform init -no-color 
         terraform show "tf_plan"
-        terraform destroy   --var-file=./environment/${PREFIX}.tfvars   -auto-approve -input=false
+        terraform destroy   --var-file=./environment/${{ secrets.PREFIX }}.tfvars   -auto-approve -input=false
