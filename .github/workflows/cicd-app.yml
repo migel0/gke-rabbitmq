@@ -3,12 +3,12 @@
 # Deploys terraform config in dev/* branches to DEV env
 #
 #############################################################
-name: Gke-Rabbit-deployment
+name: App-Check-interact
 
 on: 
   push:
     branches:
-      - 'infradev/**'
+      - 'appdev/**'
     pull_request:
     workflow_dispatch:
     inputs:
@@ -16,10 +16,8 @@ on:
         description: 'Excute Terraform destroy, write yes'
         required: false
         default: 'no'
-
- #  paths:
- #  - 'gke_tf/**'
- #  - 'worker_nodes/**' 
+    paths:
+      - 'app/**'
 
 concurrency: 
   group: ${{ github.action == 'Gke-Rabbit-deployment' }}
@@ -36,6 +34,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@master
+      
+      - name: Deletefile
+        run: rm -rf ./gcloudkey.json
       
       - name: Setup GCP Service Account
         uses: google-github-actions/setup-gcloud@master
