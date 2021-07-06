@@ -104,7 +104,7 @@ jobs:
       run: |
         terraform init -no-color 
         terraform show "tf_plan"
-        terraform apply "tf_plan"  --auto-approve -input=false
+        terraform apply -var-file=./environment/${PREFIX}.tfvars  -auto-approve -input=false
   
 
   rabbitmq:
