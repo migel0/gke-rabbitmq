@@ -117,8 +117,8 @@ jobs:
       - name: Get vars
         if: github.event_name == 'push' 
         run: |
-          CLUSTERNAME=$(grep "^name =" environment/dev.tfvars | cut -d '"' -f2)
-          CLUSTERZONE=$(grep "^zone =" environment/dev.tfvars | cut -d '"' -f2)
+          CLUSTERNAME=$(grep "^name ="./environment/dev.tfvars | cut -d '"' -f2)
+          CLUSTERZONE=$(grep "^zone ="./environment/dev.tfvars | cut -d '"' -f2)
           export CLUSTERNAME
           export CLUSTERZONE
           sed  -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./rabbitmq/02-rabbitmqcluster.tmpl >  ./rabbitmq/02-rabbitmqcluster.yaml
