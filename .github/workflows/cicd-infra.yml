@@ -84,6 +84,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
 
+    - name: Deletefile
+      run: rm -rf ./gcloudkey.json
+      
     - name: Setup GCP Service Account
       uses: google-github-actions/setup-gcloud@master
       with:
