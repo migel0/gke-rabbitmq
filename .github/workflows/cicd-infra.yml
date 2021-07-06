@@ -39,7 +39,6 @@ jobs:
 
       - name: Prepare tfvars
         if: github.event_name == 'push' 
-        id: varsCluster
         run: |
           sed -i 's/GHBTOKEN/'"${{ secrets.GHBTOKEN }}"'/g'  ./environment/${{ secrets.PREFIX }}.tfvars
 
@@ -89,6 +88,11 @@ jobs:
     steps: 
     - name: Checkout
       uses: actions/checkout@master
+  
+    - name: Prepare tfvars
+      if: github.event_name == 'push' 
+      run: |
+        sed -i 's/GHBTOKEN/'"${{ secrets.GHBTOKEN }}"'/g'  ./environment/${{ secrets.PREFIX }}.tfvars
 
     - name: Setup GCP Service Account
       uses: google-github-actions/setup-gcloud@master
