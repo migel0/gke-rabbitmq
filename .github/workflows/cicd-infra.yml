@@ -138,8 +138,8 @@ jobs:
         if:  github.event_name == 'push' 
         uses: google-github-actions/get-gke-credentials@main
         with:
-          cluster_name: ${{ steps.varsCluster.outputs.clustername }}"
-          location: ${{ steps.varsCluster.outputs.clusterzone }}"
+          cluster_name: ${{ steps.varsCluster.outputs.clustername }}
+          location: europe-west3-b
           credentials: ${{ secrets.GCP_SA_KEY }}
           use_internal_ip: true
       
