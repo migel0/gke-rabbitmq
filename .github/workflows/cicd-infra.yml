@@ -118,8 +118,8 @@ jobs:
         if: github.event_name == 'push' 
         run: |
           ls -al 
-          CLUSTERNAME=$(grep "^name ="./environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
-          CLUSTERZONE=$(grep "^zone ="./environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
+          CLUSTERNAME=$(grep "^name" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
+          CLUSTERZONE=$(grep "^main_zone =" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
           export CLUSTERNAME
           export CLUSTERZONE
           pwd
