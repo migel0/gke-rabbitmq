@@ -10,7 +10,7 @@ resource "google_container_cluster" "app_cluster" {
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count       = 1
+  initial_node_count       = 3
 
   ip_allocation_policy {
     cluster_ipv4_cidr_block  = var.pods_ipv4_cidr_block
@@ -76,8 +76,8 @@ resource "google_container_node_pool" "app_cluster_linux_node_pool" {
   node_count     = 1
 
   autoscaling {
-    max_node_count = 3
-    min_node_count = 1
+    max_node_count = 4
+    min_node_count = 3
   }
   max_pods_per_node = 100
 
@@ -88,7 +88,7 @@ resource "google_container_node_pool" "app_cluster_linux_node_pool" {
 
   node_config {
     preemptible  = true
-    disk_size_gb = 50
+    disk_size_gb = 75
     machine_type = "e2-standard-2"
 
     service_account = var.service_account
