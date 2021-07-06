@@ -44,7 +44,8 @@ jobs:
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-
+          credentials_file_path: ./gcloudkey.json
+          
       # Generates an execution plan for Terraform
       - name: Terraform Validate
         continue-on-error: true
@@ -90,6 +91,7 @@ jobs:
         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
+        credentials_file_path: ./gcloudkey.json
         
 
     - name: Download TF Plan
@@ -210,6 +212,7 @@ jobs:
         service_account_email: ${{ secrets.GCP_SA_EMAIL }}
         service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
+        credentials_file_path: ./gcloudkey.json
 
         # destroy resources via Terraform        
     - name: Terraform Destroy
