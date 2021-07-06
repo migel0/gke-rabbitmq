@@ -84,7 +84,6 @@ jobs:
     - name: Checkout
       uses: actions/checkout@master
 
-      
     - name: Setup GCP Service Account
       uses: google-github-actions/setup-gcloud@master
       with:
@@ -94,7 +93,6 @@ jobs:
         export_default_credentials: true
         credentials_file_path: ./gcloudkey.json
         
-
     - name: Download TF Plan
       uses: actions/download-artifact@v2
       with:
@@ -106,7 +104,7 @@ jobs:
       run: |
         terraform init -no-color 
         terraform show "tf_plan"
-        terraform apply "tf_plan"  -auto-approve -input=false
+        terraform apply "tf_plan"  --auto-approve -input=false
   
 
   rabbitmq:
