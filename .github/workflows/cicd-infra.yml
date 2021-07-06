@@ -120,21 +120,26 @@ jobs:
 
       - name: Get vars
         if: github.event_name == 'push' 
+        id: varsCluster
         run: |
           ls -al environment
           export CLUSTERNAME=$(grep "^name" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
           export CLUSTERZONE=$(grep "^main_zone" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
-          pwd
+          echo '::set-output name=clustername::${CLUSTERNAME}'
+          echo '::set-output name=clusterzone::${CLUSTERZONE}'
           sed -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./modules/rabbitmq/02-rabbitmqcluster.tmpl >  ./modules/rabbitmq/02-rabbitmqcluster.yaml
 
-  
+      #export CLUSTERZONE=$(grep "^main_zone" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
+      #export CLUSTERZONE=$(grep "^main_zone" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
+      #pwd
+      #echo ::set-output name=CLUSTERNAME::
 
       - id: get-credentials
         if:  github.event_name == 'push' 
         uses: google-github-actions/get-gke-credentials@main
         with:
-          cluster_name: ${CLUSTERNAME}
-          location: ${CLUSTERZONE}
+          cluster_name: ${{ steps.varsCluster.outputs.clustername }}"
+          location: ${{ steps.varsCluster.outputs.clusterzone }}"
           credentials: ${{ secrets.GCP_SA_KEY }}
           use_internal_ip: true
       
