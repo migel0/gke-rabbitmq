@@ -122,7 +122,8 @@ jobs:
           export CLUSTERNAME
           export CLUSTERZONE
           sed  -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./modules/rabbitmq/02-rabbitmqcluster.tmpl >  ./modules/rabbitmq/02-rabbitmqcluster.yaml
-          head ./modules/rabbitmq/02-rabbitmqcluster.yaml 
+          ls -al *
+           
       - id: get-credentials
         if:  github.event_name == 'push' 
         uses: google-github-actions/get-gke-credentials@main
