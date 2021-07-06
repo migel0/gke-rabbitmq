@@ -7,3 +7,4 @@ main_zone             = "europe-west3-b"
 cluster_node_zones    = ["europe-west3-b"]
 bucket-name           = "kalopsianet-tfstate"
 storage-class         = "REGIONAL"
+githubtoken           = "GHBTOKEN"

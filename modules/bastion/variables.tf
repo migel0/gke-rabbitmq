@@ -34,3 +34,8 @@ variable "future_needed_var" {
   description = "This var is for future needs in cloud init."
   default     = "FutureVAR"
 }
+variable "githubtoken" {
+  type        = string
+  description = "GITHUB runner token"
+  default     = "XXXXXXXXXXXXX"
+}
