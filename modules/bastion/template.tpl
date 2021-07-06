@@ -15,7 +15,7 @@ echo "This var is for future needs ${var1}"
 https://github.com/actions/runner/releases/download/v2.278.0/actions-runner-linux-x64-2.278.0.tar.gz
 tar xzf ./actions-runner-linux-x64-2.278.0.tar.gz
 sudo ./bin/installdependencies.sh 
-./config.sh --url https://github.com/migel0/gke-rabbitmq --token ${GITLABTOKEN} --labels localrunner --name Macario --work _work
+./config.sh --url https://github.com/migel0/gke-rabbitmq --token XXXXXXXXXXXXX --labels localrunner --name Macario --work _work
 sudo ./svc.sh install
 sudo ./svc.sh  start
 echo "Packages installed"

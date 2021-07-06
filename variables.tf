@@ -42,9 +42,3 @@ variable "name" {
   type        = string
   description = "The name of the cluster"
 }
-
-variable "githubtoken" {
-  type        = string
-  description = "GITHUB runner token"
-  default     = "XXXXXXXXXXXXX"
-}

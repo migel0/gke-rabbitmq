@@ -40,7 +40,7 @@ jobs:
       - name: Prepare tfvars
         if: github.event_name == 'push' 
         run: |
-          sed -i 's/GHBTOKEN/'"${{ secrets.GHBTOKEN }}"'/g'  ./environment/${{ secrets.PREFIX }}.tfvars
+          sed -i 's/XXXXXXXXXXXXX/'"${{ secrets.GHBTOKEN }}"'/g'  modules/bastion/template.tpl
 
       - name: Setup GCP Service Account
         uses: google-github-actions/setup-gcloud@master
@@ -92,7 +92,7 @@ jobs:
     - name: Prepare tfvars
       if: github.event_name == 'push' 
       run: |
-        sed -i 's/GHBTOKEN/'"${{ secrets.GHBTOKEN }}"'/g'  ./environment/${{ secrets.PREFIX }}.tfvars
+        sed -i 's/XXXXXXXXXXXXX/'"${{ secrets.GHBTOKEN }}"'/g'  modules/bastion/template.tpl
 
     - name: Setup GCP Service Account
       uses: google-github-actions/setup-gcloud@master
