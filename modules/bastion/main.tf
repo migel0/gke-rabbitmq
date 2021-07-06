@@ -19,7 +19,7 @@ resource "google_compute_firewall" "bastion-ssh" {
   source_ranges = ["0.0.0.0/0"] // TODO: Restrict further.
 
   allow {
-    
+
     protocol = "tcp"
     ports    = ["22"]
   }
@@ -52,19 +52,19 @@ resource "google_compute_instance" "bastion" {
   network_interface {
     subnetwork = var.subnet_name
 
-    
+
     access_config {
       // Not setting "nat_ip", use an ephemeral external IP.
       network_tier = "STANDARD"
     }
   }
-  
+
   // Install packages on startup.  
   metadata_startup_script = templatefile("${path.module}/template.tpl",
     {
-    // if need pass vars in cloudinit
+      // if need pass vars in cloudinit
       var1 = var.future_needed_var
-    })
+  })
 
 
   // Allow the instance to be stopped by Terraform when updating configuration.

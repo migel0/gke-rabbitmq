@@ -43,7 +43,9 @@ jobs:
         continue-on-error: true
         run: |
           cat /dev/null > tf_plan
-          terraform fmt -recursive -check -diff
+           terraform fmt -recursive -check -diff
+          terraform fmt -recursive -check=true
+          terraform init
           terraform validate
 
       - name: Terraform Plan

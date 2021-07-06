@@ -21,7 +21,7 @@ resource "google_compute_subnetwork" "subnet" {
   region                   = var.region
   network                  = google_compute_network.vpc.name
   private_ip_google_access = true
-} 
+}
 
 resource "google_compute_route" "egress_internet" {
   name             = "egress-internet"

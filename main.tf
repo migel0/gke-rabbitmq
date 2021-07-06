@@ -7,7 +7,7 @@ module "google_networks" {
 }
 
 module "google_kubernetes_cluster" {
-  source = "./modules/kubernetes_cluster"
+  source                     = "./modules/kubernetes_cluster"
   name                       = var.name
   project_id                 = var.project_id
   region                     = var.region

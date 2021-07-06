@@ -13,13 +13,13 @@ resource "google_container_cluster" "app_cluster" {
   initial_node_count       = 1
 
   ip_allocation_policy {
-    cluster_ipv4_cidr_block = var.pods_ipv4_cidr_block
+    cluster_ipv4_cidr_block  = var.pods_ipv4_cidr_block
     services_ipv4_cidr_block = var.services_ipv4_cidr_block
   }
-  network = var.network_name
+  network    = var.network_name
   subnetwork = var.subnet_name
 
-  logging_service = "logging.googleapis.com/kubernetes"
+  logging_service    = "logging.googleapis.com/kubernetes"
   monitoring_service = "monitoring.googleapis.com/kubernetes"
   maintenance_policy {
     daily_maintenance_window {
@@ -46,15 +46,15 @@ resource "google_container_cluster" "app_cluster" {
   }
 
   release_channel {
-	  channel = "STABLE"
+    channel = "STABLE"
   }
 
   addons_config {
     network_policy_config {
-        disabled = false
-      }
+      disabled = false
+    }
   }
-  
+
   pod_security_policy_config {
     enabled = false
   }
