@@ -117,15 +117,16 @@ jobs:
       - name: Get vars
         if: github.event_name == 'push' 
         run: |
-          CLUSTERNAME=$(grep "^name ="./environment/dev.tfvars | cut -d '"' -f2)
-          CLUSTERZONE=$(grep "^zone ="./environment/dev.tfvars | cut -d '"' -f2)
+          ls -al environment/
+          CLUSTERNAME=$(grep "^name ="./environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
+          CLUSTERZONE=$(grep "^zone ="./environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
           export CLUSTERNAME
           export CLUSTERZONE
           pwd
           ls -al 
-          sed -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  02-rabbitmqcluster.tmpl >  02-rabbitmqcluster.yaml
+          sed -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./modules/rabbitmq/02-rabbitmqcluster.tmpl >  ./modules/rabbitmq/02-rabbitmqcluster.yaml
           ls -al 
-        working-directory: ./modules/rabbitmq
+  
 
       - id: get-credentials
         if:  github.event_name == 'push' 
