@@ -109,6 +109,25 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
           #credentials_file_path: ./gcloudkey.json
+    
+      - name: Get vars
+        if: github.event_name == 'push' 
+        id: varsCluster
+        run: |
+          echo "CLUSTERNAME=$(grep "^name" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
+          echo "CLUSTERZONE=$(grep "^region" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
+          sed -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./modules/rabbitmq/02-rabbitmqcluster.tmpl >  ./modules/rabbitmq/02-rabbitmqcluster.yaml
+
+      - id: get-credentials
+        if:  github.event_name == 'push' 
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: ${{ env.CLUSTERNAME }}
+          location: ${{ env.CLUSTERZONE }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
+          use_internal_ip: true
+
+
 
       - name: Deploy helm
         run: |
