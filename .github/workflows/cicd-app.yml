@@ -34,7 +34,9 @@ jobs:
           languages: go, javascript
 
     # Here is where you build your code
-      - run: go build -o send
+      - run: |
+          cd app
+          go build -o send
       
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v1
