@@ -110,9 +110,12 @@ jobs:
           export_default_credentials: true
           #credentials_file_path: ./gcloudkey.json
 
-      - name: Deploy
-        uses: WyriHaximus/github-action-helm3@v2
-        with:
-          exec: helm upgrade check-service ./chart-service/ --install --wait --atomic --values=./chart-service/values.yaml --set configmap.rmq_url="amqp://97Kiz8riWRsGeBpptuwg41p9FffIBdk6:0zbLBA6c1TDOKAqd__WmFORoQrNnwFR3@10.102.99.135:5672/"
-          #kubeconfig: '${{ secrets.KUBECONFIG }}'
+      - name: Deploy helm
+        run: |
+          helm install check-service chart-service/ --set configmap.rmq_url="amqp://97Kiz8riWRsGeBpptuwg41p9FffIBdk6:0zbLBA6c1TDOKAqd__WmFORoQrNnwFR3@10.102.99.135:5672/"
+      # - name: Deploy
+      #   uses: WyriHaximus/github-action-helm3@v2
+      #   with:
+      #     exec: helm upgrade check-service ./chart-service/ --install --wait --atomic --values=./chart-service/values.yaml --set configmap.rmq_url="amqp://97Kiz8riWRsGeBpptuwg41p9FffIBdk6:0zbLBA6c1TDOKAqd__WmFORoQrNnwFR3@10.102.99.135:5672/"
+      #     kubeconfig: '${{ secrets.KUBECONFIG }}'
 
