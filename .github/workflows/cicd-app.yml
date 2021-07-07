@@ -114,8 +114,8 @@ jobs:
         if: github.event_name == 'push' 
         id: varsCluster
         run: |
-          echo "CLUSTERNAME=$(grep "^name" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
-          echo "CLUSTERZONE=$(grep "^region" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
+          echo "CLUSTERNAME=$(grep "^name" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
+          echo "CLUSTERZONE=$(grep "^region" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
 
       - id: get-credentials
         if:  github.event_name == 'push' 
