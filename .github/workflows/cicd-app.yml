@@ -28,6 +28,7 @@ jobs:
       name: DEV
     
     steps:
+      - uses: actions/checkout@v1
       - name: codeql
         uses: github/codeql-action/init@v1
         with:
@@ -35,6 +36,7 @@ jobs:
 
     # Here is where you build your code
       - run: |
+          ls -al
           cd app
           go build -o send
       
