@@ -1,31 +1,46 @@
 # gke-rabbitmq-test
-GKE and RabbitMQ Terraform
 
-This terraform repo deploys private GKE cluster on Google Cloud using Google Actions.
-Also deploy RabbitMQ operator, and cluster-
+## Deploy a Kubernetes cluster in GKE and a RabbitMQ cluster too using Terraform.
 
-Keeping in mind the GKE cluster is private, thinking in  pourposes deploy a Bastion VM machine.
+This repo deploys private a GKE cluster on Google Cloud using Google Actions.
+Also deploy RabbitMQ operator and cluster.
 
-Based and copypasted  in:
+Keeping in mind the GKE cluster is private, for manage the k8s a Bastion VM machine is included in de deployemts.
 
-https://orlando-thoeny.medium.com/create-a-private-gcp-kubernetes-cluster-using-terraform-1a830dd802a8
-https://pavan1999-kumar.medium.com/deploying-rabbitmq-on-kubernetes-using-rabbitmq-cluster-operator-ef99f7a4e417
+----------------------
 
-
-Documentation:
-[Github google Actions](https://github.com/google-github-actions)
 
 ## Requirements
 
-###  Google Cloud SDK
+- Google Cloud SDK
 See https://cloud.google.com/sdk/docs/quickstart.
-
-###  Terraform CLI
+- Terraform CLI
 See https://www.terraform.io/downloads.html.
-
-### Create GCP service account & JSON key
-
+- Create GCP service account & JSON key
 Go to https://console.cloud.google.com/identity/serviceaccounts and create a service account. And a JSON key for it.
 
-### Configure Terraform variables
-Replace the values as needed. environment/[dev,pro,etc].tfvars .
+
+# Infra 
+
+[link](.doc/gke.md)
+
+# App
+
+[link](.doc/app.md)
+
+# GitHub Pipelines
+
+[link](.doc/pipelines.md)
+
+
+# Get cluster credentials
+GET_CREDS="$(terraform output --state=terraform/terraform.tfstate get_credentials)"
+${GET_CREDS}
+
+
+--------------
+# Documentation
+
+[link](.doc/extdoc.md)
+
+

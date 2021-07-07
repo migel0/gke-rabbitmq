@@ -116,7 +116,6 @@ jobs:
         run: |
           echo "CLUSTERNAME=$(grep "^name" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
           echo "CLUSTERZONE=$(grep "^region" environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
-          sed -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./modules/rabbitmq/02-rabbitmqcluster.tmpl >  ./modules/rabbitmq/02-rabbitmqcluster.yaml
 
       - id: get-credentials
         if:  github.event_name == 'push' 
