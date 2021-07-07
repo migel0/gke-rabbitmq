@@ -17,10 +17,6 @@ on:
         required: false
         default: 'no'
 
- #  paths:
- #  - 'gke_tf/**'
- #  - 'worker_nodes/**' 
-
 concurrency: 
   group: ${{ github.action == 'Gke-Rabbit-deployment' }}
   cancel-in-progress: true

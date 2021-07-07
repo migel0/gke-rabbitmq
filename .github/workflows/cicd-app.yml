@@ -78,16 +78,21 @@ jobs:
 
       - name: Build and Push Container
         run: |-
-          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
-          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+          echo "Building image "
+          gcloud builds submit --timeout=1200 --tag gcr.io/${{ env.ENVIRONMENT }}_${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+          gcloud container images add-tag gcr.io/${{ env.ENVIRONMENT }}_${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} images add-tag gcr.io/${{ env.ENVIRONMENT }}_${{ env.PROJECT_ID }}/${{ env.SERVICE }}:latest
+
+        #docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
+        #docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT }}
           SERVICE: rabbitcheck
+          ENVIRONMENT: dev
 
   deploy_helm:
     name: 'Deploy Charts'
     runs-on: localrunner
-    needs: [test_codeql, lint-helm, build_docker]
+    needs: [build_docker]
     environment:
       name: DEV
 
@@ -102,58 +107,11 @@ jobs:
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-          credentials_file_path: ./gcloudkey.json
+          #credentials_file_path: ./gcloudkey.json
 
       - name: Deploy
         uses: WyriHaximus/github-action-helm3@v2
         with:
           exec: helm upgrade check-service ./chart-service/ --install --wait --atomic --values=./chart-service/values.yaml --set configmap.rmq_url="amqp://97Kiz8riWRsGeBpptuwg41p9FffIBdk6:0zbLBA6c1TDOKAqd__WmFORoQrNnwFR3@10.102.99.135:5672/"
-          kubeconfig: '${{ secrets.KUBECONFIG }}'
+          #kubeconfig: '${{ secrets.KUBECONFIG }}'
 
-
-
-
-
-#  slack_notification:
-#    name: 'Slack Notification'
-#    runs-on: ubuntu-latest
-#      environment:
-#        name: dev
-#    needs: [terraform_validate, terraform_apply, rabbitmq]
-#    if: always()
-#
-#    steps:
-#    - uses: actions/checkout@v2 
-#
-#    - name: Apply Slack Notification
-#      uses: rtCamp/action-slack-notify@v2
-#      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-#      env:
-#        SLACK_CHANNEL: Deployments-channel
-#        SLACK_COLOR: ${{ needs.terraform_apply.result }}
-#        SLACK_TITLE: ${{ github.repository }}
-#        SLACK_MESSAGE: ${{ github.event.head_commit.message }}
-#        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-#        SLACK_FOOTER: 'Terraform Github Actions Dev Branch Alert'
-#    
-#    - name: Plan Slack Notification
-#      uses: rtCamp/action-slack-notify@v2
-#      if: github.ref != 'refs/heads/main' && github.event_name == 'push'
-#      env:
-#        SLACK_CHANNEL: Deployments-channel
-#        SLACK_COLOR: ${{ needs.terraform_validate.result }}
-#        SLACK_TITLE: ${{ github.repository }}
-#        SLACK_MESSAGE: ${{ github.event.head_commit.message }}
-#        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-#        SLACK_FOOTER: 'Terraform Github Actions Dev Branch Push Alert'
-
-#    - name: Plan Slack Notification
-#      uses: rtCamp/action-slack-notify@v2
-#      if: github.ref != 'refs/heads/main' && github.event_name == 'push'
-#      env:
-#        SLACK_CHANNEL: Deployments-channel
-#        SLACK_COLOR: ${{ needs.rabbitmq.result }}
-#        SLACK_TITLE: ${{ github.repository }}
-#        SLACK_MESSAGE: ${{ github.event.head_commit.message }}
-#        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-#        SLACK_FOOTER: 'Terraform Github Actions Dev Branch Push Alert'

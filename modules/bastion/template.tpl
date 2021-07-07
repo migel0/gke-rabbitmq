@@ -8,8 +8,6 @@ helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 sudo apt-get install -y kubectl
-# Runner
-sudo su - mpajarin
 mkdir actions-runner && cd actions-runner
 curl -o actions-runner-linux-x64-2.278.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.278.0/actions-runner-linux-x64-2.278.0.tar.gz
 echo "This var is for future needs ${var1}"
