@@ -37,7 +37,6 @@ jobs:
     # Here is where you build your code
       - run: |
           ls -al
-          cd app
           go build -o send
       
       - name: Perform CodeQL Analysis
