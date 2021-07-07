@@ -9,25 +9,50 @@ on:
   push:
     branches:
       - 'appdev/**'
-    pull_request:
-    workflow_dispatch:
-    inputs:
-      actiondestroy:
-        description: 'Excute Terraform destroy, write yes'
-        required: false
-        default: 'no'
     paths:
       - 'app/**'
 
-concurrency: 
-  group: ${{ github.action == 'Gke-Rabbit-deployment' }}
-  cancel-in-progress: true
+defaults:
+  run:
+    working-directory: app
 
+concurrency: 
+  group: ${{ github.action == 'App-Check-interact' }}
+  cancel-in-progress: true
+  
 jobs:
-  terraform_plan:
-    name: 'Terraform Plan'
+  test_codeql:
+    name: Initialize CodeQL
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name != 'pull_request'
+    environment:
+      name: DEV
+    
+    steps:
+      - name: codeql
+        uses: github/codeql-action/init@v1
+        with:
+          languages: go, javascript
+
+    # Here is where you build your code
+      - run: go build -o send
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
+  
+  lint-helm:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Lint Helm
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm lint ./chart-service/
+
+  build_docker:
+    name: 'Create Container'
+    runs-on: localrunner
+    needs: [test_codeql, lint-helm]
     environment:
       name: DEV
 
@@ -44,110 +69,47 @@ jobs:
           export_default_credentials: true
           credentials_file_path: ./gcloudkey.json
           
-      # Generates an execution plan for Terraform
-      - name: Terraform Validate
-        continue-on-error: true
-        run: |
-          cat /dev/null > tf_plan
-          terraform fmt -recursive  -diff
-          terraform fmt -recursive -check=true
-          terraform init
-          terraform validate
+      - name: Authorize Docker push
+        run: gcloud auth configure-docker
 
-      - name: Terraform Plan
-        continue-on-error: true
-        run: |
-          cat /dev/null > tf_plan
-          terraform init
-          terraform get     
-          terraform plan --var-file=./environment/${{ secrets.PREFIX }}.tfvars -out "tf_plan" -input=false
+      - name: Build and Push Container
+        run: |-
+          docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
+          docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
+        env:
+          PROJECT_ID: ${{ secrets.GCP_PROJECT }}
+          SERVICE: rabbitcheck
 
-      - name: Upload TF Plan
-        uses: actions/upload-artifact@v2
-        with:
-          name: tf_plan
-          path: ./tf_plan
-          if-no-files-found: error
-          retention-days: 1
-
-  terraform_apply:
-    name: 'Terraform Apply'
-    runs-on: ubuntu-latest
-    needs: terraform_plan
-    if: github.event_name == 'push'
+  deploy_helm:
+    name: 'Deploy Charts'
+    runs-on: localrunner
+    needs: [test_codeql, lint-helm, build_docker]
     environment:
       name: DEV
 
-    steps: 
-    - name: Checkout
-      uses: actions/checkout@master
-
-    - name: Setup GCP Service Account
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        version: 'latest'
-        service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
-        credentials_file_path: ./gcloudkey.json
-        
-
-    - name: Download TF Plan
-      uses: actions/download-artifact@v2
-      with:
-        name: tf_plan
-        path: ./
-
-    # Provision resources via Terraform        
-    - name: Terraform Apply
-      run: |
-        terraform init -no-color 
-        terraform show "tf_plan"
-        terraform apply "tf_plan"  --auto-approve -input=false
-  
-
-  rabbitmq:
-    name: rabbitmq
-    runs-on: ubuntu-latest
-    environment:
-      name: DEV
-    needs: terraform_apply
-    steps:    
-      - name: Get vars
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push' 
-        run: |
-          CLUSTERNAME=$(grep "^name =" environment/dev.tfvars | cut -d '"' -f2)
-          CLUSTERZONE=$(grep "^zone =" environment/dev.tfvars | cut -d '"' -f2)
-          export CLUSTERNAME
-          export CLUSTERZONE
-          sed  -e 's/ENVIRON/development/g'  -e 's/RABBITUSER/'"${{ secrets.RABBITUSER }}"'/g'  -e 's/RABBITPASS/'"${{ secrets.RABITPASS }}"'/g'  ./rabbitmq/02-rabbitmqcluster.tmpl >  ./rabbitmq/02-rabbitmqcluster.yaml
-
-      - id: get-credentials
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push' 
-        uses: google-github-actions/get-gke-credentials@main
-        with:
-          cluster_name: ${CLUSTERNAME}
-          location: ${CLUSTERZONE}
-          credentials: ${{ secrets.GCP_SA_KEY }}
-          use_internal_ip: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
       
-      - id: get-pods
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push' 
-        run: kubectl get pods -A 
+      - name: Setup GCP Service Account
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: 'latest'
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+          credentials_file_path: ./gcloudkey.json
 
-      - id: install-rabbitmq-operator
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push' 
-        run: kubectl apply -f ./rabbitmq/01-cluster-operator.yml
+      - name: Deploy
+        uses: WyriHaximus/github-action-helm3@v2
+        with:
+          exec: helm upgrade check-service ./chart-service/ --install --wait --atomic --values=./chart-service/values.yaml --set configmap.rmq_url="amqp://97Kiz8riWRsGeBpptuwg41p9FffIBdk6:0zbLBA6c1TDOKAqd__WmFORoQrNnwFR3@10.102.99.135:5672/"
+          kubeconfig: '${{ secrets.KUBECONFIG }}'
 
-      - id: install-rabbitmq-cluster
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push' 
-        run:  kubectl apply -f ./rabbitmq/02-rabbitmqcluster.yaml
-        
-      - id: get-info-after-bootstrap
-        if: github.ref == 'refs/heads/master' && github.event_name == 'push' 
-        run: |
-           kubectl get pods -A 
-  
+
+
+
+
 #  slack_notification:
 #    name: 'Slack Notification'
 #    runs-on: ubuntu-latest
@@ -191,30 +153,3 @@ jobs:
 #        SLACK_MESSAGE: ${{ github.event.head_commit.message }}
 #        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 #        SLACK_FOOTER: 'Terraform Github Actions Dev Branch Push Alert'
-
-  terraform_destroy:
-    name: 'Terraform Destroy'
-    runs-on: ubuntu-latest
-    if: github.event.inputs.actiondestroy == 'yes'
-    environment:
-      name: DEV
-
-    steps: 
-    - name: Checkout
-      uses: actions/checkout@master
-
-    - name: Setup GCP Service Account
-      uses: google-github-actions/setup-gcloud@master
-      with:
-        version: 'latest'
-        service_account_email: ${{ secrets.GCP_SA_EMAIL }}
-        service_account_key: ${{ secrets.GCP_SA_KEY }}
-        export_default_credentials: true
-        credentials_file_path: ./gcloudkey.json
-
-        # destroy resources via Terraform        
-    - name: Terraform Destroy
-      run: |
-        terraform init -no-color 
-        terraform show "tf_plan"
-        terraform destroy  "tf_plan" --var-file=./environment/${PREFIX}.tfvars   -auto-approve -input=false
