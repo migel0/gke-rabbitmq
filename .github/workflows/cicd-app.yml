@@ -79,8 +79,8 @@ jobs:
       - name: Build and Push Container
         run: |-
           echo "Building image "
-          gcloud builds submit --timeout=1200 --tag gcr.io/${{ env.ENVIRONMENT }}_${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
-          gcloud container images add-tag gcr.io/${{ env.ENVIRONMENT }}_${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} images add-tag gcr.io/${{ env.ENVIRONMENT }}_${{ env.PROJECT_ID }}/${{ env.SERVICE }}:latest
+          gcloud builds submit --timeout=1200 --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.ENVIRONMENT }}_${{ env.SERVICE }}:${{  github.sha }}
+          gcloud container images add-tag gcr.io/${{ env.PROJECT_ID }}/${{ env.ENVIRONMENT }}_${{ env.SERVICE }}:${{  github.sha }} images add-tag gcr.io/${{ env.ENVIRONMENT }}_${{ env.PROJECT_ID }}/${{ env.SERVICE }}:latest
 
         #docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
         #docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
