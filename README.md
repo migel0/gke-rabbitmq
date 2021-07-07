@@ -1,11 +1,16 @@
 # gke-rabbitmq-test
 
-## Deploy a Kubernetes cluster in GKE and a RabbitMQ cluster too using Terraform.
+## Deploy a Kubernetes cluster in GKE and a RabbitMQ cluster too using Terraform. Additionaly 
+##  go application for check service healht and send messages to a queue
 
-This repo deploys private a GKE cluster on Google Cloud using Google Actions.
-Also deploy RabbitMQ operator and cluster.
+This repo deploy a test scenario:
+ - First deploy a private a GKE cluster on Google Cloud using Google Actions.Also deploy RabbitMQ operator and cluster.
+ - Second build a  tiny go application, into a Docker and deploy  simple chart in GKE.
 
-Keeping in mind the GKE cluster is private, for manage the k8s a Bastion VM machine is included in de deployemts.
+Keeping in mind the GKE cluster is private, with the goal to manage the cluster and the app deployments also  a Bastion VM machine is included.
+I forget it! Bastion also is configure as github runner for run some Github Actions,again a need as soon as GKE cluster is private.
+
+
 
 ----------------------
 
@@ -20,20 +25,20 @@ See https://www.terraform.io/downloads.html.
 Go to https://console.cloud.google.com/identity/serviceaccounts and create a service account. And a JSON key for it.
 
 
-# Infra 
+## Infra 
 
 [link](.doc/gke.md)
 
-# App
+## App
 
 [link](.doc/app.md)
 
-# GitHub Pipelines
+## GitHub Pipelines
 
 [link](.doc/pipelines.md)
 
 
-# Get cluster credentials
+## Get cluster credentials
 GET_CREDS="$(terraform output --state=terraform/terraform.tfstate get_credentials)"
 ${GET_CREDS}
 

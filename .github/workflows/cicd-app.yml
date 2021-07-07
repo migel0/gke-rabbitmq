@@ -24,8 +24,6 @@ jobs:
   test_codeql:
     name: Initialize CodeQL
     runs-on: ubuntu-latest
-    environment:
-      name: DEV
     
     steps:
       - uses: actions/checkout@v1
@@ -57,8 +55,6 @@ jobs:
     name: 'Create Container'
     runs-on: localrunner
     needs: [test_codeql, lint-helm]
-    environment:
-      name: DEV
 
     steps:
       - name: Checkout
@@ -72,7 +68,19 @@ jobs:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
           credentials_file_path: ./gcloudkey.json
+
+      - name: Cluster env for staging/dev/pro
+        if: "github.event.release.prerelease"
+        run: |
+          BRANCH=$(git branch -r --contains ${GITHUB_SHA} | grep "")
+          MASTER_BRANCH_NAME='origin/master'
           
+          if [[ "$BRANCH" == *"$MASTER_BRANCH_NAME"* ]]; then
+            echo ::set-env name=CLUSTER_ENV::stag
+          else
+            echo ::set-env name=CLUSTER_ENV::dev
+          fi
+      
       - name: Authorize Docker push
         run: gcloud auth configure-docker
 
@@ -80,15 +88,14 @@ jobs:
         run: |-
           echo "Building image "
           gcloud config set project  ${{ secrets.GCP_PROJECT }}
-          gcloud builds submit --timeout=1200 --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.ENVIRONMENT }}_${{ env.SERVICE }}:${{  github.sha }}   --verbosity=debug --gcs-log-dir=gs://kalopsianet_cloudbuild/logs
-          gcloud container images add-tag  gcr.io/${{ env.PROJECT_ID }}/${{ env.ENVIRONMENT }}_${{ env.SERVICE }}:${{  github.sha }} gcr.io/${{ env.PROJECT_ID }}/${{ env.ENVIRONMENT }}_${{ env.SERVICE }}:latest   --verbosity=debug 
+          gcloud builds submit --timeout=1200 --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }}   --verbosity=debug --gcs-log-dir=gs://kalopsianet_cloudbuild/logs
+          gcloud container images add-tag  gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }} gcr.io/${{ env.PROJECT_ID }}/${{ env.ENVIRONMENT }}_${{ env.SERVICE }}:latest   --verbosity=debug 
 
         #docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
         #docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
         env:
           PROJECT_ID: ${{ secrets.GCP_PROJECT }}
           SERVICE: rabbitcheck
-          ENVIRONMENT: dev
 
   deploy_helm:
     name: 'Deploy Charts'
@@ -108,14 +115,17 @@ jobs:
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-          #credentials_file_path: ./gcloudkey.json
+          credentials_file_path: ${HOME}/.gcloud.json
     
       - name: Get vars
         if: github.event_name == 'push' 
         id: varsCluster
         run: |
-          echo "CLUSTERNAME=$(grep "^name" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
-          echo "CLUSTERZONE=$(grep "^region" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
+            echo ::set-env name=CLUSTERNAME::$(grep "^name" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
+            echo ::set-env name=CLUSTERZONE::$(grep "^region" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)
+# echo "CLUSTERNAME=$(grep "^name" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
+# echo "CLUSTERZONE=$(grep "^region" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
+
 
       - id: get-credentials
         if:  github.event_name == 'push' 
@@ -130,7 +140,9 @@ jobs:
 
       - name: Deploy helm
         run: |
-          helm install check-service chart-service/ --set configmap.rmq_url="amqp://97Kiz8riWRsGeBpptuwg41p9FffIBdk6:0zbLBA6c1TDOKAqd__WmFORoQrNnwFR3@10.102.99.135:5672/"
+          echo "CLUSTERIP=$(kubectl get svc check-service-rabbitmq-helm -o jsonpath='{.spec.clusterIP}')"  >> $GITHUB_ENV
+          helm upgrade --install check-service chart-service/ \
+              --set configmap.rmq_url="amqp://${{ secrets.RABBITUSER }}:${{ secrets.RABBITPASS }}@${{ env.CLUSTERIP }}:5672/"
       # - name: Deploy
       #   uses: WyriHaximus/github-action-helm3@v2
       #   with:
