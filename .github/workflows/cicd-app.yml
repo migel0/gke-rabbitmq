@@ -89,7 +89,7 @@ jobs:
           echo "Building image "
           gcloud config set project ${{ env.PROJECT_ID }}
           gcloud builds submit --timeout=1200 --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }}   --verbosity=debug --gcs-log-dir=gs://kalopsianet_cloudbuild/logs
-          gcloud container images add-tag  gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }} gcr.io/${{ env.PROJECT_ID }}/${{ env.ENVIRONMENT }}_${{ env.SERVICE }}:latest   --verbosity=debug 
+          gcloud container images add-tag  gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }} gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:latest   --verbosity=debug 
 
         #docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
         #docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
