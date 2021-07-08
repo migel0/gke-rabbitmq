@@ -87,9 +87,9 @@ jobs:
       - name: Build and Push Container
         run: |-
           echo "Building image "
-          gcloud config set project ${{ env.PROJECT_ID }}
-          gcloud builds submit --timeout=1200 --tag gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }}   --verbosity=debug --gcs-log-dir=gs://kalopsianet_cloudbuild/logs
-          gcloud container images add-tag  gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }} gcr.io/${{ env.PROJECT_ID }}/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:latest   --verbosity=debug 
+          gcloud config set project kalopsianet
+          gcloud builds submit --timeout=1200 --tag gcr.io/kalopsianet/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }}   --verbosity=debug --gcs-log-dir=gs://kalopsianet_cloudbuild/logs
+          gcloud container images add-tag  gcr.io/kalopsianet/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:${{  github.sha }} gcr.io/kalopsianet/${{ env.CLUSTER_ENV }}_${{ env.SERVICE }}:latest   --verbosity=debug 
 
         #docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }} .
         #docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE }}:${{  github.sha }}
@@ -126,7 +126,6 @@ jobs:
 # echo "CLUSTERNAME=$(grep "^name" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
 # echo "CLUSTERZONE=$(grep "^region" ../environment/${{ secrets.PREFIX }}.tfvars | cut -d '"' -f2)" >> $GITHUB_ENV
 
-
       - id: get-credentials
         if:  github.event_name == 'push' 
         uses: google-github-actions/get-gke-credentials@main
@@ -135,8 +134,6 @@ jobs:
           location: ${{ env.CLUSTERZONE }}
           credentials: ${{ secrets.GCP_SA_KEY }}
           use_internal_ip: true
-
-
 
       - name: Deploy helm
         run: |
